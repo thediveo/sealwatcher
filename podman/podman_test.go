@@ -95,7 +95,7 @@ var _ = Describe("podman engineclient", Ordered, func() {
 		goodgos := Goroutines()
 		goodfds := Filedescriptors()
 		DeferCleanup(func() {
-			Eventually(Goroutines).ShouldNot(HaveLeaked(goodgos))
+			Eventually(Goroutines).WithTimeout(2 * time.Second).ShouldNot(HaveLeaked(goodgos))
 			Expect(Filedescriptors()).NotTo(HaveLeakedFds(goodfds))
 		})
 	})
@@ -204,12 +204,13 @@ var _ = Describe("podman engineclient", Ordered, func() {
 		By("done")
 	})
 
-	It("tracks pods", func() {
+	It("determine pod names of containers", func() {
 		const podname = "dizzy_lizzy"
 
 		defer func() {
-			By("winding things down")
-			pw.Close()
+			// The p.o.'d.man client *is* nasty.
+			conn, _ := bindings.GetClient(podconn)
+			conn.Client.CloseIdleConnections()
 		}()
 
 		ctx, cancel := context.WithCancel(context.Background())
@@ -240,15 +241,20 @@ var _ = Describe("podman engineclient", Ordered, func() {
 			ContainElements(
 				And(
 					HaveID(id),
-					HaveField("Labels", HaveKeyWithValue(PodLabelName, pod.Id)),
+					HaveField("Labels", And(
+						HaveKeyWithValue(PodLabelName, podname),
+						HaveKeyWithValue(PodIDName, pod.Id))),
 				),
 				And(
 					HaveField("Labels", And(
 						HaveKey(InfraLabelName),
-						HaveKeyWithValue(PodLabelName, pod.Id),
+						HaveKeyWithValue(PodLabelName, podname),
+						HaveKeyWithValue(PodIDName, pod.Id),
 					)),
 				),
 			))
+
+		By("done")
 	})
 
 })

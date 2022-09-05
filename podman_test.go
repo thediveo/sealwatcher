@@ -69,6 +69,7 @@ var _ = Describe("podman watcher", func() {
 
 		pw, err := New("unix:///var/run/podman/podman.sock", nil)
 		Expect(err).NotTo(HaveOccurred())
+		defer pw.Close()
 		go func() {
 			defer GinkgoRecover()
 			By("starting a watch...")

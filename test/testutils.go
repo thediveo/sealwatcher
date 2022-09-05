@@ -89,7 +89,7 @@ func NewContainer(conn context.Context, desc NewContainerDescription, options ..
 
 	if spec.Image == "" && spec.Rootfs == "" {
 		spec.Image = "docker.io/library/busybox"
-		spec.Command = []string{"/bin/sleep", "60s"}
+		spec.Command = []string{"/bin/sh", "-c", "i=60; while [ $i -ne 0 ]; do sleep 1; i=$(($i-1)); done"}
 	}
 
 	resp, err := containers.CreateWithSpec(conn, spec, nil)

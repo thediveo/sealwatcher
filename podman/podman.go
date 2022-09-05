@@ -16,11 +16,14 @@ package podman
 
 import (
 	"context"
+	"time"
 
 	"github.com/containers/podman/v3/pkg/bindings"
 	"github.com/containers/podman/v3/pkg/bindings/containers"
+	"github.com/containers/podman/v3/pkg/bindings/pods"
 	"github.com/containers/podman/v3/pkg/bindings/system"
 	"github.com/containers/podman/v3/pkg/domain/entities"
+	"github.com/jellydator/ttlcache/v3"
 	"github.com/thediveo/sealwatcher/util"
 	"github.com/thediveo/whalewatcher"
 	"github.com/thediveo/whalewatcher/engineclient"
@@ -36,6 +39,7 @@ const (
 	PodmanAnnotation = "io.github.thediveo/podman/"
 
 	PodLabelName   = PodmanAnnotation + "podname" // name of pod if applicable
+	PodIDName      = PodmanAnnotation + "podid"   // ID of pod if applicable
 	InfraLabelName = PodmanAnnotation + "infra"   // present only if container is an infra container
 )
 
@@ -45,9 +49,10 @@ const (
 // process dead (line) just to justify not having to call it "daemon" because it
 // doesn't run constantly in the background. Unless someone watches a podman.
 type PodmanWatcher struct { //revive:disable-line:exported
-	pid    int                         // optional engine PID when known.
-	podman context.Context             // (minimal) moby engine API client ... which is actually a context?!
-	packer engineclient.RucksackPacker // optional Rucksack packer for app-specific container information.
+	pid      int                             // optional engine PID when known.
+	podman   context.Context                 // (minimal) moby engine API client ... which is actually a context?!
+	packer   engineclient.RucksackPacker     // optional Rucksack packer for app-specific container information.
+	podcache *ttlcache.Cache[string, string] // pod ID->name TTL cache
 }
 
 // Make sure that the EngineClient interface is fully implemented.
@@ -59,11 +64,13 @@ var _ (engineclient.EngineClient) = (*PodmanWatcher)(nil)
 // cases.
 func NewPodmanWatcher(podman context.Context, opts ...NewOption) *PodmanWatcher {
 	pw := &PodmanWatcher{
-		podman: podman,
+		podman:   podman,
+		podcache: ttlcache.New(ttlcache.WithTTL[string, string](1 * time.Minute)),
 	}
 	for _, opt := range opts {
 		opt(pw)
 	}
+	go pw.podcache.Start()
 	return pw
 }
 
@@ -134,11 +141,12 @@ func (pw *PodmanWatcher) Client() interface{} { return pw.podman }
 
 // Close cleans up and release any engine client resources, if necessary.
 func (pw *PodmanWatcher) Close() {
-	client, err := bindings.GetClient(pw.podman)
-	if err != nil {
-		return
+	if pw.podcache != nil {
+		pw.podcache.Stop()
 	}
-	client.Client.CloseIdleConnections()
+	if client, _ := bindings.GetClient(pw.podman); client != nil {
+		client.Client.CloseIdleConnections()
+	}
 }
 
 // List all the currently alive and kicking containers, but do not list any
@@ -197,7 +205,8 @@ func (pw *PodmanWatcher) Inspect(svcctx context.Context, nameorid string) (*whal
 		cntr.Labels[moby.PrivilegedLabel] = ""
 	}
 	if details.Pod != "" {
-		cntr.Labels[PodLabelName] = details.Pod
+		cntr.Labels[PodIDName] = details.Pod
+		cntr.Labels[PodLabelName] = pw.podName(ctx, details.Pod)
 	}
 	if details.IsInfra {
 		cntr.Labels[InfraLabelName] = "" // just mark the presence.
@@ -340,4 +349,20 @@ func (pw *PodmanWatcher) LifecycleEvents(svcctx context.Context) (<-chan enginec
 // and deadline mixed into it.
 func (pw *PodmanWatcher) y(ctx context.Context) (context.Context, context.CancelFunc) {
 	return wye.Mixin(pw.podman, ctx)
+}
+
+// podName returns the name of a pod, given only its ID – as is the case with
+// the container details which always reference their pod (if any) by ID, never
+// by name.
+func (pw *PodmanWatcher) podName(ctx context.Context, podid string) string {
+	if podname := pw.podcache.Get(podid); podname != nil {
+		return podname.Value()
+	}
+	poddetails, err := pods.Inspect(ctx, podid, &pods.InspectOptions{})
+	if err != nil {
+		// We don't do negative caching here.
+		return ""
+	}
+	pw.podcache.Set(podid, poddetails.Name, ttlcache.DefaultTTL)
+	return poddetails.Name
 }
