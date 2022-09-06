@@ -144,13 +144,12 @@ var _ = Describe("podman engineclient", Ordered, func() {
 			To(HaveField("Because", "no such container"))
 	})
 
-	It("lists a furuncle", func() {
+	It("inspects and lists a furuncle", func() {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		cntr, err := pw.List(ctx)
-		Expect(err).NotTo(HaveOccurred())
-		Expect(cntr).To(ContainElement(HaveName(furiousFuruncle.Name)))
+		Expect(pw.Inspect(ctx, furiousFuruncle.Name)).Error().NotTo(HaveOccurred())
+		Expect(pw.List(ctx)).To(ContainElement(HaveName(furiousFuruncle.Name)))
 	})
 
 	It("watches containers come and go", func() {
