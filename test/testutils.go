@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/containers/podman/v3/pkg/bindings/containers"
+	"github.com/containers/podman/v3/pkg/bindings/images"
 	"github.com/containers/podman/v3/pkg/specgen"
 	"github.com/thediveo/sealwatcher/util"
 
@@ -91,6 +92,9 @@ func NewContainer(conn context.Context, desc NewContainerDescription, options ..
 		spec.Image = "docker.io/library/busybox"
 		spec.Command = []string{"/bin/sh", "-c", "i=60; while [ $i -ne 0 ]; do sleep 1; i=$(($i-1)); done"}
 	}
+
+	policy := "missing"
+	g.Expect(images.Pull(conn, spec.Image, &images.PullOptions{Policy: &policy})).Error().NotTo(g.HaveOccurred())
 
 	resp, err := containers.CreateWithSpec(conn, spec, nil)
 	g.Expect(err).NotTo(g.HaveOccurred())
