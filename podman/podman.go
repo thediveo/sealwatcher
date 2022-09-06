@@ -199,6 +199,9 @@ func (pw *PodmanWatcher) Inspect(svcctx context.Context, nameorid string) (*whal
 		Project: details.Config.Labels[moby.ComposerProjectLabel],
 		Paused:  details.State.Paused,
 	}
+	if cntr.Labels == nil {
+		cntr.Labels = map[string]string{}
+	}
 	if details.HostConfig != nil && details.HostConfig.Privileged {
 		// Just the presence of the "magic" label is sufficient; the label's
 		// value doesn't matter.
