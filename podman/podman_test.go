@@ -68,10 +68,6 @@ var _ = Describe("podman engineclient", Ordered, func() {
 
 		podconn, err = bindings.NewConnection(ctx, "unix:///var/run/podman/podman.sock")
 		Expect(err).NotTo(HaveOccurred())
-		DeferCleanup(func() {
-			client, _ := bindings.GetClient(podconn)
-			client.Client.CloseIdleConnections()
-		})
 
 		test.RemoveContainer(podconn, furiousFuruncle.Name)
 		test.RemoveContainer(podconn, madMay.Name)
@@ -95,6 +91,10 @@ var _ = Describe("podman engineclient", Ordered, func() {
 		goodgos := Goroutines()
 		goodfds := Filedescriptors()
 		DeferCleanup(func() {
+			// The p.o.'d.man client *is* nasty.
+			conn, _ := bindings.GetClient(podconn)
+			conn.Client.CloseIdleConnections()
+
 			Eventually(Goroutines).WithTimeout(2 * time.Second).ShouldNot(HaveLeaked(goodgos))
 			Expect(Filedescriptors()).NotTo(HaveLeakedFds(goodfds))
 		})
@@ -203,14 +203,8 @@ var _ = Describe("podman engineclient", Ordered, func() {
 		By("done")
 	})
 
-	It("determine pod names of containers", func() {
+	It("determines pod names of containers", func() {
 		const podname = "dizzy_lizzy"
-
-		defer func() {
-			// The p.o.'d.man client *is* nasty.
-			conn, _ := bindings.GetClient(podconn)
-			conn.Client.CloseIdleConnections()
-		}()
 
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
