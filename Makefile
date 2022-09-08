@@ -18,4 +18,7 @@ report: ## run goreportcard on this module
 	@scripts/goreportcard.sh
 
 test: ## run unit tests
-	go test -v -exec sudo -p=1 ./... # -race tripped by podman v3 system.Events
+	@go test -v -exec sudo -p=1 ./... # -race tripped by podman v3 system.Events
+
+vuln: ## run go vulnerabilities check
+	@govulncheck ./...
