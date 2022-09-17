@@ -10,7 +10,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.1.6
 	github.com/onsi/gomega v1.20.2
 	github.com/thediveo/fdooze v0.1.5
-	github.com/thediveo/whalewatcher v0.7.1
+	github.com/thediveo/whalewatcher v0.8.0
 	github.com/thediveo/wye v0.1.1
 )
 
