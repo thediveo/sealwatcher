@@ -16,6 +16,7 @@ package podman
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	"github.com/containers/podman/v3/pkg/bindings"
@@ -53,10 +54,14 @@ type PodmanWatcher struct { //revive:disable-line:exported
 	podman   context.Context                 // (minimal) moby engine API client ... which is actually a context?!
 	packer   engineclient.RucksackPacker     // optional Rucksack packer for app-specific container information.
 	podcache *ttlcache.Cache[string, string] // pod ID->name TTL cache
+
+	vmu     sync.Mutex
+	version string // cached version information
 }
 
 // Make sure that the EngineClient interface is fully implemented.
 var _ (engineclient.EngineClient) = (*PodmanWatcher)(nil)
+var _ (engineclient.Trialer) = (*PodmanWatcher)(nil)
 
 // NewPodmanWatcher returns a new PodmanWatcher using the specified podman
 // connection; typically, you would want to use this lower-level constructor
@@ -96,31 +101,48 @@ func WithRucksackPacker(packer engineclient.RucksackPacker) NewOption {
 }
 
 // ID returns the (more or less) unique engine identifier; the exact format is
-// engine-specific.
+// engine-specific. In case of Podman there is no genuine engine ID due to
+// Podman's architecture. So we simply use the API endpoint path as the ID.
 func (pw *PodmanWatcher) ID(svcctx context.Context) string {
-	ctx, release := pw.y(svcctx)
-	defer release()
-
-	info, err := system.Info(ctx, nil)
-	if err != nil || info.Host.RemoteSocket == nil {
-		return ""
-	}
-	return info.Host.RemoteSocket.Path // ...podmen don't have identity
+	return pw.API() // ...avoid the Info roundtrips.
 }
 
 // Type returns the type identifier for this container engine.
 func (pw *PodmanWatcher) Type() string { return Type }
 
-// Version information about the engine.
+// Version information about this Podman engine.
 func (pw *PodmanWatcher) Version(svcctx context.Context) string {
+	// Turns out that the Podman Info service is extremely slow, so we need to
+	// cache the Podman engine version information.
+	pw.vmu.Lock()
+	defer pw.vmu.Unlock()
+	if pw.version == "" {
+		pw.fetchVersionUnderLock(svcctx)
+	}
+	return pw.version
+}
+
+// Try queries the version of the Podman service and caches the result.
+func (pw *PodmanWatcher) Try(svcctx context.Context) error {
+	pw.vmu.Lock()
+	defer pw.vmu.Unlock()
+	return pw.fetchVersionUnderLock(svcctx)
+}
+
+// fetchVersionUnderLock unconditionally fetches the Podman engine version and
+// updates our cached version information. If there is an error fetching the
+// version, then the cached version is set to "unknown" and an error returned.
+func (pw *PodmanWatcher) fetchVersionUnderLock(svcctx context.Context) error {
 	ctx, release := pw.y(svcctx)
 	defer release()
 
 	info, err := system.Version(ctx, nil)
 	if err != nil {
-		return ""
+		pw.version = "unknown"
+		return err
 	}
-	return info.Server.Version
+	pw.version = info.Server.Version
+	return nil
 }
 
 // API returns the container engine API path.
