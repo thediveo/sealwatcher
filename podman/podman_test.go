@@ -113,7 +113,7 @@ var _ = Describe("podman engineclient", Ordered, func() {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 		Expect(pw.ID(ctx)).ToNot(BeEmpty())
-		Expect(pw.Version(ctx)).NotTo(BeEmpty())
+		Expect(pw.Version(ctx)).To(MatchRegexp(`\d+.\d+.\d+`))
 	})
 
 	It("inspects a furuncle", func() {

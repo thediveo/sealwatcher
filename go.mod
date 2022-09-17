@@ -2,13 +2,15 @@ module github.com/thediveo/sealwatcher
 
 go 1.19
 
+replace github.com/containernetworking/cni => github.com/containernetworking/cni v0.8.1
+
 require (
 	github.com/cenkalti/backoff/v4 v4.1.3
-	github.com/containers/podman/v3 v3.4.7
+	github.com/containers/podman/v3 v3.4.8-0.20220914182006-4ad96289891a
 	github.com/onsi/ginkgo/v2 v2.1.6
 	github.com/onsi/gomega v1.20.2
 	github.com/thediveo/fdooze v0.1.5
-	github.com/thediveo/whalewatcher v0.7.0
+	github.com/thediveo/whalewatcher v0.7.1
 	github.com/thediveo/wye v0.1.1
 )
 
@@ -16,7 +18,7 @@ require (
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/BurntSushi/toml v0.4.1 // indirect
 	github.com/Microsoft/go-winio v0.5.2 // indirect
-	github.com/Microsoft/hcsshim v0.9.3 // indirect
+	github.com/Microsoft/hcsshim v0.9.4 // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
 	github.com/beorn7/perks v1.0.1 // indirect

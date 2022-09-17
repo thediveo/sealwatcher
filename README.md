@@ -6,7 +6,7 @@
 [![GitHub](https://img.shields.io/github/license/thediveo/sealwatcher)](https://img.shields.io/github/license/thediveo/sealwatcher)
 ![build and test](https://github.com/thediveo/sealwatcher/workflows/build%20and%20test/badge.svg?branch=master)
 ![goroutines](https://img.shields.io/badge/go%20routines-not%20leaking-success)
-![Coverage](https://img.shields.io/badge/Coverage-88.9%25-brightgreen)
+![Coverage](https://img.shields.io/badge/Coverage-86.1%25-brightgreen)
 [![Go Report Card](https://goreportcard.com/badge/github.com/thediveo/sealwatcher)](https://goreportcard.com/report/github.com/thediveo/sealwatcher)
 
 `sealwatcher` adds [Podman](https://podman.io) support to
