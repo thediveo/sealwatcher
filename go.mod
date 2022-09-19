@@ -7,7 +7,7 @@ replace github.com/containernetworking/cni => github.com/containernetworking/cni
 require (
 	github.com/cenkalti/backoff/v4 v4.1.3
 	github.com/containers/podman/v3 v3.4.8-0.20220914182006-4ad96289891a
-	github.com/onsi/ginkgo/v2 v2.1.6
+	github.com/onsi/ginkgo/v2 v2.2.0
 	github.com/onsi/gomega v1.20.2
 	github.com/thediveo/fdooze v0.1.5
 	github.com/thediveo/whalewatcher v0.8.0

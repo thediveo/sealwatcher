@@ -29,11 +29,8 @@ jobs:
       - name: Set up podman dev dependencies
         run: |
           sudo apt-get -y install \
-            btrfs-progs go-md2man iptables libassuan-dev libbtrfs-dev libc6-dev \
-            libdevmapper-dev libglib2.0-dev libgpgme-dev libgpg-error-dev libprotobuf-dev \
-            libprotobuf-c-dev libseccomp-dev libselinux1-dev libsystemd-dev pkg-config \
-            runc uidmap
-
+            build-essential pkg-config libbtrfs-dev libgpgme-dev
+  
       - name: Set up Go for root
         run: |
           sudo ln -sf `which go` `sudo which go` || true
@@ -43,4 +40,4 @@ jobs:
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # pin@v3
 
       - name: Test Go packages
-        run: go test -v -p 1 -exec sudo ./...
+        run: go test -v -p 1 -tags exclude_graphdriver_btrfs,exclude_graphdriver_devicemapper,libdm_no_deferred_remove -exec sudo ./...

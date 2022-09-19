@@ -6,7 +6,7 @@
 [![GitHub](https://img.shields.io/github/license/thediveo/sealwatcher)](https://img.shields.io/github/license/thediveo/sealwatcher)
 ![build and test](https://github.com/thediveo/sealwatcher/workflows/build%20and%20test/badge.svg?branch=master)
 ![goroutines](https://img.shields.io/badge/go%20routines-not%20leaking-success)
-![Coverage](https://img.shields.io/badge/Coverage-86.1%25-brightgreen)
+![Coverage](https://img.shields.io/badge/Coverage-89.6%25-brightgreen)
 [![Go Report Card](https://goreportcard.com/badge/github.com/thediveo/sealwatcher)](https://goreportcard.com/report/github.com/thediveo/sealwatcher)
 
 `sealwatcher` adds [Podman](https://podman.io) support to
@@ -24,25 +24,26 @@ then `sealwatcher` might be finally integrated into `whalewatcher`.
 ## Installation
 
 First, install the non-Go stuff the Podman module insists of having available,
-even if it is totally unnecessary for a REST API client. The following is
-basically the Debian/Ubuntu package list from [Podman's "Building from
+even if it is totally unnecessary for a REST API client. The following is a
+massively stripped-down version of the Debian/Ubuntu package list from [Podman's
+"Building from
 scratch"](https://podman.io/getting-started/installation#building-from-scratch)
-instructions, sans the packages that are either already installed (Go) or are
-chosen by the builder anyway, such as `docker-ce` versus `docker.io`:
+instructions:
 
 ```bash
-sudo apt-get install \
-  btrfs-progs go-md2man iptables libassuan-dev libbtrfs-dev libc6-dev libdevmapper-dev \
-  libglib2.0-dev libgpgme-dev libgpg-error-dev libprotobuf-dev libprotobuf-c-dev \
-  libseccomp-dev libselinux1-dev libsystemd-dev pkg-config runc uidmap
+sudo apt-get -y install build-essential pkg-config libbtrfs-dev libgpgme-dev
 ```
 
 In order to use `sealwatcher` as a depency in your own Go modules, you first
-need to pin the `cni` module version and then `go get` the `sealwatcher` module.
+need to pin the `cni` module version in your `go.mod`...
+
+```
+replace github.com/containernetworking/cni => github.com/containernetworking/cni v0.8.1
+```
+
+...and only then you can `go get` the `sealwatcher` module.
 
 ```bash
-# make sure to pin the containernetworking/cni module dependency!
-go get github.com/containernetworking/cni@v0.8.1
 go get github.com/thediveo/sealwatcher
 ```
 

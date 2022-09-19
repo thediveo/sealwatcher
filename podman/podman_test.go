@@ -18,6 +18,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/containers/podman/v3/libpod/define"
 	"github.com/containers/podman/v3/pkg/bindings"
 	"github.com/containers/podman/v3/pkg/bindings/containers"
 	"github.com/containers/podman/v3/pkg/bindings/pods"
@@ -34,6 +35,17 @@ import (
 	. "github.com/thediveo/fdooze"
 	. "github.com/thediveo/whalewatcher/test/matcher"
 )
+
+type packer struct{}
+
+func (p *packer) Pack(container *whalewatcher.Container, inspection interface{}) {
+	Expect(container).NotTo(BeNil())
+	Expect(inspection).NotTo(BeNil())
+	var details *define.InspectContainerData
+	Expect(inspection).To(BeAssignableToTypeOf(details))
+	details = inspection.(*define.InspectContainerData)
+	container.Rucksack = &details
+}
 
 var (
 	furiousFuruncle = test.NewContainerDescription{
@@ -116,9 +128,20 @@ var _ = Describe("podman engineclient", Ordered, func() {
 		Expect(pw.Version(ctx)).To(MatchRegexp(`\d+.\d+.\d+`))
 	})
 
+	It("sets a rucksack packer", func() {
+		p := packer{}
+		pw := NewPodmanWatcher(podconn, WithRucksackPacker(&p))
+		Expect(pw).NotTo(BeNil())
+		defer pw.Close()
+		Expect(pw.packer).To(BeIdenticalTo(&p))
+	})
+
 	It("inspects a furuncle", func() {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
+
+		defer func() { pw.packer = nil }()
+		pw.packer = &packer{}
 
 		cntr, err := pw.Inspect(ctx, furiousFuruncle.Name)
 		Expect(err).NotTo(HaveOccurred())
@@ -127,6 +150,7 @@ var _ = Describe("podman engineclient", Ordered, func() {
 		Expect(cntr).To(HaveProject(furiousFuruncle.Labels[moby.ComposerProjectLabel]))
 		Expect(cntr.Paused).To(BeFalse())
 		Expect(cntr.Labels).NotTo(HaveKey(moby.PrivilegedLabel))
+		Expect(cntr.Rucksack).NotTo(BeNil())
 	})
 
 	It("can't inspect a dead_dummy", func() {
@@ -201,6 +225,10 @@ var _ = Describe("podman engineclient", Ordered, func() {
 		Eventually(errs).Should(Receive(Equal(ctx.Err())))
 
 		By("done")
+	})
+
+	It("returns an empty name for a non-existing pod ID", func() {
+		Expect(pw.podName(podconn, "---podname-not-for-sale---")).To(BeEmpty())
 	})
 
 	It("determines pod names of containers", func() {
