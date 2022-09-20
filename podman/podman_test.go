@@ -16,6 +16,7 @@ package podman
 
 import (
 	"context"
+	"os"
 	"time"
 
 	"github.com/containers/podman/v3/libpod/define"
@@ -72,6 +73,10 @@ var _ = Describe("podman engineclient", Ordered, func() {
 	var pw *PodmanWatcher
 
 	BeforeAll(func() {
+		if os.Geteuid() != 0 {
+			Skip("needs real root, not that fake user-space 'root' *snicker*")
+		}
+
 		var err error
 		ctx, cancel := context.WithCancel(context.Background())
 		DeferCleanup(func() {
