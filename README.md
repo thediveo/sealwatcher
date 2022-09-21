@@ -47,6 +47,13 @@ replace github.com/containernetworking/cni => github.com/containernetworking/cni
 go get github.com/thediveo/sealwatcher
 ```
 
+Finally, when building your application using `sealwatcher` directly or
+indirectly, use these build tags:
+
+```
+-tags exclude_graphdriver_btrfs,exclude_graphdriver_devicemapper,libdm_no_deferred_remove
+```
+
 ## Supported Go Versions
 
 `sealwatcher` supports versions of Go that are noted by the [Go release

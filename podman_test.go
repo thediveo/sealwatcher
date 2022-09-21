@@ -16,9 +16,11 @@ package sealwatcher
 
 import (
 	"context"
+	"os"
 	"time"
 
 	"github.com/containers/podman/v3/pkg/bindings"
+	"github.com/containers/podman/v3/pkg/rootless"
 	"github.com/thediveo/sealwatcher/test"
 	"github.com/thediveo/whalewatcher"
 	"github.com/thediveo/whalewatcher/engineclient/moby"
@@ -54,9 +56,13 @@ var _ = Describe("podman watcher", func() {
 	})
 
 	It("watches a container", func() {
+		if os.Geteuid() != 0 || rootless.IsRootless() /* work around botched podman code base */ {
+			Skip("needs root")
+		}
+
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
-		podconn, err := bindings.NewConnection(ctx, "unix:///var/run/podman/podman.sock")
+		podconn, err := bindings.NewConnection(ctx, "unix:///run/podman/podman.sock")
 		Expect(err).NotTo(HaveOccurred())
 		client, _ := bindings.GetClient(podconn)
 		defer client.Client.CloseIdleConnections()
@@ -67,7 +73,7 @@ var _ = Describe("podman watcher", func() {
 		test.NewContainer(podconn, furiousFuruncle)
 		defer test.RemoveContainer(podconn, furiousFuruncle.Name)
 
-		pw, err := New("unix:///var/run/podman/podman.sock", nil)
+		pw, err := New("unix:///run/podman/podman.sock", nil)
 		Expect(err).NotTo(HaveOccurred())
 		defer pw.Close()
 		go func() {

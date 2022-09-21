@@ -24,6 +24,7 @@ import (
 	"github.com/containers/podman/v3/pkg/bindings/containers"
 	"github.com/containers/podman/v3/pkg/bindings/pods"
 	"github.com/containers/podman/v3/pkg/domain/entities"
+	"github.com/containers/podman/v3/pkg/rootless"
 	"github.com/containers/podman/v3/pkg/specgen"
 	"github.com/thediveo/sealwatcher/test"
 	"github.com/thediveo/whalewatcher"
@@ -73,8 +74,8 @@ var _ = Describe("podman engineclient", Ordered, func() {
 	var pw *PodmanWatcher
 
 	BeforeAll(func() {
-		if os.Geteuid() != 0 {
-			Skip("needs real root, not that fake user-space 'root' *snicker*")
+		if os.Geteuid() != 0 || rootless.IsRootless() /* work around botched podman code base */ {
+			Skip("needs root")
 		}
 
 		var err error
