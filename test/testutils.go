@@ -23,6 +23,7 @@ import (
 	"github.com/thediveo/sealwatcher/util"
 
 	g "github.com/onsi/gomega"
+	s "github.com/thediveo/success"
 )
 
 // TargetContainerStatus is the status a newly created container should reach
@@ -96,8 +97,7 @@ func NewContainer(conn context.Context, desc NewContainerDescription, options ..
 	policy := "missing"
 	g.Expect(images.Pull(conn, spec.Image, &images.PullOptions{Policy: &policy})).Error().NotTo(g.HaveOccurred())
 
-	resp, err := containers.CreateWithSpec(conn, spec, nil)
-	g.Expect(err).NotTo(g.HaveOccurred())
+	resp := s.Successful(containers.CreateWithSpec(conn, spec, nil))
 	id = resp.ID
 	if desc.Status == Created {
 		return

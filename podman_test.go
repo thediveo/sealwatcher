@@ -29,6 +29,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gleak"
 	. "github.com/thediveo/fdooze"
+	. "github.com/thediveo/success"
 	. "github.com/thediveo/whalewatcher/test/matcher"
 )
 
@@ -55,15 +56,14 @@ var _ = Describe("podman watcher", func() {
 		Expect(New("unix:///bourish.socket.puppet", nil)).Error().To(HaveOccurred())
 	})
 
-	It("watches a container", func() {
+	It("watches a container", func(ctx context.Context) {
 		if os.Geteuid() != 0 || rootless.IsRootless() /* work around botched podman code base */ {
 			Skip("needs root")
 		}
 
-		ctx, cancel := context.WithCancel(context.Background())
+		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
-		podconn, err := bindings.NewConnection(ctx, "unix:///run/podman/podman.sock")
-		Expect(err).NotTo(HaveOccurred())
+		podconn := Successful(bindings.NewConnection(ctx, "unix:///run/podman/podman.sock"))
 		client, _ := bindings.GetClient(podconn)
 		defer client.Client.CloseIdleConnections()
 
@@ -73,8 +73,7 @@ var _ = Describe("podman watcher", func() {
 		test.NewContainer(podconn, furiousFuruncle)
 		defer test.RemoveContainer(podconn, furiousFuruncle.Name)
 
-		pw, err := New("unix:///run/podman/podman.sock", nil)
-		Expect(err).NotTo(HaveOccurred())
+		pw := Successful(New("unix:///run/podman/podman.sock", nil))
 		defer pw.Close()
 		go func() {
 			defer GinkgoRecover()

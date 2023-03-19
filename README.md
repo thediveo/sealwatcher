@@ -87,4 +87,5 @@ one, _erm_, go.
 
 ## Copyright and License
 
-Copyright 2022 Harald Albrecht, licensed under the Apache License, Version 2.0.
+Copyright 2022-23 Harald Albrecht, licensed under the Apache License, Version
+2.0.

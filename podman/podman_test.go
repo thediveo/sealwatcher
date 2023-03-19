@@ -35,6 +35,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gleak"
 	. "github.com/thediveo/fdooze"
+	. "github.com/thediveo/success"
 	. "github.com/thediveo/whalewatcher/test/matcher"
 )
 
@@ -78,14 +79,12 @@ var _ = Describe("podman engineclient", Ordered, func() {
 			Skip("needs root")
 		}
 
-		var err error
 		ctx, cancel := context.WithCancel(context.Background())
 		DeferCleanup(func() {
 			cancel()
 		})
 
-		podconn, err = bindings.NewConnection(ctx, "unix:///var/run/podman/podman.sock")
-		Expect(err).NotTo(HaveOccurred())
+		podconn = Successful(bindings.NewConnection(ctx, "unix:///var/run/podman/podman.sock"))
 
 		test.RemoveContainer(podconn, furiousFuruncle.Name)
 		test.RemoveContainer(podconn, madMay.Name)
@@ -127,8 +126,8 @@ var _ = Describe("podman engineclient", Ordered, func() {
 		Expect(pw.API()).NotTo(BeEmpty())
 	})
 
-	It("has an ID and version", func() {
-		ctx, cancel := context.WithCancel(context.Background())
+	It("has an ID and version", func(ctx context.Context) {
+		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 		Expect(pw.ID(ctx)).ToNot(BeEmpty())
 		Expect(pw.Version(ctx)).To(MatchRegexp(`\d+.\d+.\d+`))
@@ -142,15 +141,14 @@ var _ = Describe("podman engineclient", Ordered, func() {
 		Expect(pw.packer).To(BeIdenticalTo(&p))
 	})
 
-	It("inspects a furuncle", func() {
-		ctx, cancel := context.WithCancel(context.Background())
+	It("inspects a furuncle", func(ctx context.Context) {
+		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 
 		defer func() { pw.packer = nil }()
 		pw.packer = &packer{}
 
-		cntr, err := pw.Inspect(ctx, furiousFuruncle.Name)
-		Expect(err).NotTo(HaveOccurred())
+		cntr := Successful(pw.Inspect(ctx, furiousFuruncle.Name))
 		Expect(cntr).To(HaveName(furiousFuruncle.Name))
 		Expect(cntr).To(HaveField("ID", Not(BeEmpty())))
 		Expect(cntr).To(HaveProject(furiousFuruncle.Labels[moby.ComposerProjectLabel]))
@@ -159,31 +157,31 @@ var _ = Describe("podman engineclient", Ordered, func() {
 		Expect(cntr.Rucksack).NotTo(BeNil())
 	})
 
-	It("can't inspect a dead_dummy", func() {
-		ctx, cancel := context.WithCancel(context.Background())
+	It("can't inspect a dead_dummy", func(ctx context.Context) {
+		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 
 		Expect(pw.Inspect(ctx, deadDummy.Name)).Error().To(HaveOccurred())
 	})
 
-	It("returns an error when trying to inspect a non-existing container", func() {
-		ctx, cancel := context.WithCancel(context.Background())
+	It("returns an error when trying to inspect a non-existing container", func(ctx context.Context) {
+		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 
 		Expect(pw.Inspect(ctx, "totally-non-existing-container-name")).Error().
 			To(HaveField("Because", "no such container"))
 	})
 
-	It("inspects and lists a furuncle", func() {
-		ctx, cancel := context.WithCancel(context.Background())
+	It("inspects and lists a furuncle", func(ctx context.Context) {
+		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 
 		Expect(pw.Inspect(ctx, furiousFuruncle.Name)).Error().NotTo(HaveOccurred())
 		Expect(pw.List(ctx)).To(ContainElement(HaveName(furiousFuruncle.Name)))
 	})
 
-	It("watches containers come and go", func() {
-		ctx, cancel := context.WithCancel(context.Background())
+	It("watches containers come and go", func(ctx context.Context) {
+		ctx, cancel := context.WithCancel(ctx)
 
 		evs, errs := pw.LifecycleEvents(ctx)
 		Expect(evs).NotTo(BeNil())
@@ -237,21 +235,20 @@ var _ = Describe("podman engineclient", Ordered, func() {
 		Expect(pw.podName(podconn, "---podname-not-for-sale---")).To(BeEmpty())
 	})
 
-	It("determines pod names of containers", func() {
+	It("determines pod names of containers", func(ctx context.Context) {
 		const podname = "dizzy_lizzy"
 
-		ctx, cancel := context.WithCancel(context.Background())
+		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 
 		By("creating a pod")
-		pod, err := pods.CreatePodFromSpec(podconn, &entities.PodSpec{
+		pod := Successful(pods.CreatePodFromSpec(podconn, &entities.PodSpec{
 			PodSpecGen: specgen.PodSpecGenerator{
 				PodBasicConfig: specgen.PodBasicConfig{
 					Name: podname,
 				},
 			},
-		})
-		Expect(err).NotTo(HaveOccurred())
+		}))
 		defer func() {
 			force := true
 			pods.Remove(podconn, podname, &pods.RemoveOptions{Force: &force})
@@ -280,8 +277,6 @@ var _ = Describe("podman engineclient", Ordered, func() {
 					)),
 				),
 			))
-
-		By("done")
 	})
 
 })
