@@ -1,4 +1,4 @@
-.PHONY: help clean pkgsite report test
+.PHONY: help clean coverage pkgsite report test vuln
 
 help: ## list available targets
 	@# Shamelessly stolen from Gomega's Makefile
@@ -11,7 +11,7 @@ coverage: ## gathers coverage and updates README badge
 	@scripts/cov.sh
 
 pkgsite: ## serves Go documentation on port 6060
-	@echo "navigate to: http://localhost:6060/github.com/thediveo/sealwatcher"
+	@echo "navigate to: http://localhost:6060/github.com/thediveo/sealwatcher/v2"
 	@scripts/pkgsite.sh
 
 report: ## run goreportcard on this module

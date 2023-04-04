@@ -14,7 +14,11 @@
 track the list of containers (name, PID, project, pod) without constant polling
 and without the hassle of event "binge processing".
 
-Please note: because building the Podman REST API client requires a considerable
+**Note:** `sealwatcher/v2` requires podman 4+ as it uses the API v4 client – and
+version compatibility of podman is very limited and very weak when compared to
+Docker API compatibility.
+
+**Note:** because building the Podman REST API client requires a considerable
 amount of C libraries as well as header files to be installed in the build
 system, `sealwatcher` isn't an integral part of the `whalewatcher` module so
 far. If at some future point the Podman project improves the situation so that
@@ -34,17 +38,10 @@ instructions:
 sudo apt-get -y install build-essential pkg-config libbtrfs-dev libgpgme-dev
 ```
 
-In order to use `sealwatcher` as a depency in your own Go modules, you first
-need to pin the `cni` module version in your `go.mod`...
-
-```
-replace github.com/containernetworking/cni => github.com/containernetworking/cni v0.8.1
-```
-
-...and only then you can `go get` the `sealwatcher` module.
+...then you can `go get` v2 of the `sealwatcher` module.
 
 ```bash
-go get github.com/thediveo/sealwatcher
+go get github.com/thediveo/sealwatcher@latest
 ```
 
 Finally, when building your application using `sealwatcher` directly or
