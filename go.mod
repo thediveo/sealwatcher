@@ -2,6 +2,8 @@ module github.com/thediveo/sealwatcher
 
 go 1.19
 
+require github.com/opencontainers/runc v1.1.5 // indirect; ha ha HA HAHA HAHAHAHAHAHA
+
 require (
 	github.com/cenkalti/backoff/v4 v4.2.0
 	github.com/containers/podman/v4 v4.4.4
@@ -109,7 +111,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0-rc2.0.20221005185240-3a7f492d3f1b // indirect
-	github.com/opencontainers/runc v1.1.4 // indirect
 	github.com/opencontainers/runtime-spec v1.1.0-rc.1 // indirect
 	github.com/opencontainers/runtime-tools v0.9.1-0.20221107090550-2e043c6bd626 // indirect
 	github.com/opencontainers/selinux v1.11.0 // indirect
