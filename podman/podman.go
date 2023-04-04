@@ -25,7 +25,7 @@ import (
 	"github.com/containers/podman/v4/pkg/bindings/system"
 	"github.com/containers/podman/v4/pkg/domain/entities"
 	"github.com/jellydator/ttlcache/v3"
-	"github.com/thediveo/sealwatcher/util"
+	"github.com/thediveo/sealwatcher/v2/util"
 	"github.com/thediveo/whalewatcher"
 	"github.com/thediveo/whalewatcher/engineclient"
 	"github.com/thediveo/whalewatcher/engineclient/moby"

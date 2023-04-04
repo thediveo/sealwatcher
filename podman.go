@@ -19,7 +19,7 @@ import (
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/containers/podman/v4/pkg/bindings"
-	engineclient "github.com/thediveo/sealwatcher/podman"
+	engineclient "github.com/thediveo/sealwatcher/v2/podman"
 	"github.com/thediveo/whalewatcher/watcher"
 )
 

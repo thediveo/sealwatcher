@@ -20,7 +20,7 @@ import (
 	"github.com/containers/podman/v4/pkg/bindings/containers"
 	"github.com/containers/podman/v4/pkg/bindings/images"
 	"github.com/containers/podman/v4/pkg/specgen"
-	"github.com/thediveo/sealwatcher/util"
+	"github.com/thediveo/sealwatcher/v2/util"
 
 	g "github.com/onsi/gomega"
 	s "github.com/thediveo/success"
