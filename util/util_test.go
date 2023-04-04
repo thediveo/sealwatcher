@@ -18,7 +18,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/containers/podman/v3/pkg/errorhandling"
+	"github.com/containers/podman/v4/pkg/errorhandling"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )

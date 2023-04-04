@@ -19,8 +19,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/containers/podman/v3/pkg/bindings"
-	"github.com/containers/podman/v3/pkg/rootless"
+	"github.com/containers/podman/v4/pkg/bindings"
+	"github.com/containers/podman/v4/pkg/rootless"
 	"github.com/thediveo/sealwatcher/test"
 	"github.com/thediveo/whalewatcher"
 	"github.com/thediveo/whalewatcher/engineclient/moby"

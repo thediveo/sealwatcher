@@ -17,9 +17,9 @@ package test
 import (
 	"context"
 
-	"github.com/containers/podman/v3/pkg/bindings/containers"
-	"github.com/containers/podman/v3/pkg/bindings/images"
-	"github.com/containers/podman/v3/pkg/specgen"
+	"github.com/containers/podman/v4/pkg/bindings/containers"
+	"github.com/containers/podman/v4/pkg/bindings/images"
+	"github.com/containers/podman/v4/pkg/specgen"
 	"github.com/thediveo/sealwatcher/util"
 
 	g "github.com/onsi/gomega"
@@ -115,7 +115,7 @@ func NewContainer(conn context.Context, desc NewContainerDescription, options ..
 // exist. All other errors will raise a failed Gomega assertion.
 func RemoveContainer(conn context.Context, name string) {
 	force := true
-	if err := containers.Remove(
+	if _, err := containers.Remove(
 		conn, name, &containers.RemoveOptions{Force: &force}); err != nil && !util.IsNoSuchContainerErr(err) {
 		g.Expect(err).NotTo(g.HaveOccurred())
 	}

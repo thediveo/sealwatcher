@@ -21,7 +21,7 @@ package util
 import (
 	"net/http"
 
-	"github.com/containers/podman/v3/pkg/errorhandling"
+	"github.com/containers/podman/v4/pkg/errorhandling"
 )
 
 // IsNoSuchContainerErr returns true if the given error is a 404 error response
