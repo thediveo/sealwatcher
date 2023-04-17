@@ -22,7 +22,8 @@ jobs:
 
       - name: Set up podman and start as *cough* daemon
         run: |
-          sudo apt-get -y install podman
+          wget http://ftp.debian.org/debian/pool/main/libp/libpod/podman_4.4.0+ds1-1_amd64.deb
+          sudo dpkg -i podman*.deb
           sudo systemctl enable podman.socket
           sudo systemctl start podman.socket
 
