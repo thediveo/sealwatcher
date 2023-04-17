@@ -279,4 +279,16 @@ var _ = Describe("podman engineclient", Ordered, func() {
 			))
 	})
 
+	It("queries the podman version information", func(ctx context.Context) {
+		Expect(pw.Try(ctx)).To(Succeed())
+		Expect(pw.Version(ctx)).NotTo(BeEmpty())
+	})
+
+	It("sets the version to unknown when query fails", func() {
+		cancelledctx, cancel := context.WithCancel(context.Background())
+		cancel()
+		Expect(pw.Try(cancelledctx)).NotTo(Succeed())
+		Expect(pw.Version(cancelledctx)).To(Equal("unknown"))
+	})
+
 })

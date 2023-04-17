@@ -6,7 +6,7 @@
 [![GitHub](https://img.shields.io/github/license/thediveo/sealwatcher)](https://img.shields.io/github/license/thediveo/sealwatcher)
 ![build and test](https://github.com/thediveo/sealwatcher/workflows/build%20and%20test/badge.svg?branch=master)
 ![goroutines](https://img.shields.io/badge/go%20routines-not%20leaking-success)
-![Coverage](https://img.shields.io/badge/Coverage-89.6%25-brightgreen)
+![Coverage](https://img.shields.io/badge/Coverage-93.9%25-brightgreen)
 [![Go Report Card](https://goreportcard.com/badge/github.com/thediveo/sealwatcher)](https://goreportcard.com/report/github.com/thediveo/sealwatcher)
 
 `sealwatcher` adds [Podman](https://podman.io) support to
@@ -14,9 +14,9 @@
 track the list of containers (name, PID, project, pod) without constant polling
 and without the hassle of event "binge processing".
 
-**Note:** `sealwatcher/v2` requires podman 4+ as it uses the API v4 client – and
-version compatibility of podman is very limited and very weak when compared to
-Docker API compatibility.
+**Note:** `sealwatcher/v2` requires podman 4+ as it uses the podman API v4
+client – and version compatibility of podman is very limited and very weak when
+compared to Docker API compatibility.
 
 **Note:** because building the Podman REST API client requires a considerable
 amount of C libraries as well as header files to be installed in the build
@@ -41,7 +41,7 @@ sudo apt-get -y install build-essential pkg-config libbtrfs-dev libgpgme-dev
 ...then you can `go get` v2 of the `sealwatcher` module.
 
 ```bash
-go get github.com/thediveo/sealwatcher@latest
+go get github.com/thediveo/sealwatcher/v2@latest
 ```
 
 Finally, when building your application using `sealwatcher` directly or
