@@ -1,4 +1,12 @@
-<!-- markdownlint-disable-next-line MD022 -->
+> The `sealwatcher`(`/v2`) module **is archived**, due to several non-trivial
+> issues that make maintaining it too cumbersome without any real benefit. The
+> main coffin nails are (1) the API version incompatibilties combined with only
+> older podman versions available in major distributions, (2) the still unfixed
+> botch where a remote client is moved into a new user namespace, as well as (3)
+> the need for lots of actually totally unnecessary C libraries to build a
+> remote API client. Use the Docker API of podman instead, as probably everyone
+> else does anyway. Brian won't tell.
+
 # Sealwatcher
 <img align="right" width="200" alt="sealwatcher" src="docs/_images/sealwatcher.png">
 
